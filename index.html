@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoC Pack Value Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+           VARIABLES & RESET
+           ═══════════════════════════════════════════════ */
+        :root {
+            --bg-abyss: #070a12;
+            --bg-deep: #0b0f1a;
+            --bg-card: #101523;
+            --bg-elevated: #151c30;
+            --bg-hover: #1a2340;
+            --gold-900: #6b5220;
+            --gold-700: #a07c35;
+            --gold: #c9a84c;
+            --gold-400: #dfc06a;
+            --gold-200: #f0d78c;
+            --gold-glow: rgba(201, 168, 76, 0.12);
+            --gold-glow-strong: rgba(201, 168, 76, 0.25);
+            --text: #e4ddd0;
+            --text-muted: #7d7b85;
+            --text-dim: #44434d;
+            --emerald: #34d399;
+            --emerald-dim: #065f46;
+            --ruby: #f87171;
+            --ruby-dim: #7f1d1d;
+            --border: rgba(201, 168, 76, 0.08);
+            --border-strong: rgba(201, 168, 76, 0.2);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-abyss);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Subtle noise grain overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            opacity: 0.025;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><filter id="a"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%25" height="100%25" filter="url(%23a)"/></svg>');
+            background-size: 200px 200px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Ambient light blobs */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 15% 30%, rgba(201, 168, 76, 0.04) 0%, transparent 70%),
+                radial-gradient(ellipse 500px 500px at 85% 70%, rgba(201, 168, 76, 0.03) 0%, transparent 70%),
+                radial-gradient(ellipse 300px 300px at 50% 10%, rgba(52, 211, 153, 0.015) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ═══════════════════════════════════════════════
+           HEADER
+           ═══════════════════════════════════════════════ */
+        header {
+            position: relative;
+            text-align: center;
+            padding: 20px 20px 18px;
+            background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-deep) 100%);
+            border-bottom: 1px solid var(--border-strong);
+            z-index: 10;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        header h1 {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.35em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--gold-700), var(--gold-200), var(--gold), var(--gold-200), var(--gold-700));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 6s linear infinite;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.82em;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        header .disclaimer {
+            color: var(--text-dim);
+            font-size: 0.72em;
+            margin-top: 6px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .lang-toggle {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: var(--bg-card);
+            color: var(--gold);
+            border: 1px solid var(--border-strong);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--gold-700);
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+
+        /* ═══════════════════════════════════════════════
+           MAIN LAYOUT
+           ═══════════════════════════════════════════════ */
+        main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold-900) transparent;
+        }
+
+        .panel::-webkit-scrollbar { width: 5px; }
+        .panel::-webkit-scrollbar-track { background: transparent; }
+        .panel::-webkit-scrollbar-thumb { background: var(--gold-900); border-radius: 4px; }
+
+        .panel-left {
+            background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-abyss) 100%);
+            border-right: 1px solid var(--border);
+            max-width: 50%;
+        }
+
+        .panel-right {
+            background: var(--bg-abyss);
+            max-width: 50%;
+        }
+
+        /* Section titles */
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 0.85em;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border-strong), transparent);
+        }
+
+        /* ═══════════════════════════════════════════════
+           LEFT PANEL — YOUR PACK
+           ═══════════════════════════════════════════════ */
+        .pack-empty {
+            color: var(--text-dim);
+            text-align: center;
+            padding: 48px 24px;
+            font-size: 0.9em;
+            font-style: italic;
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius-lg);
+        }
+
+        .pack-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            margin-bottom: 6px;
+            border-left: 3px solid var(--gold-700);
+            transition: background 0.2s, border-color 0.2s;
+            animation: slideIn 0.25s ease-out;
+        }
+
+        .pack-item:hover {
+            background: var(--bg-elevated);
+            border-left-color: var(--gold);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .pack-item-name {
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--text);
+        }
+
+        .pack-item-detail {
+            font-size: 0.78em;
+            color: var(--text-muted);
+            margin-top: 1px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .gem-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-200));
+            transform: rotate(45deg);
+            flex-shrink: 0;
+        }
+
+        .pack-item-remove {
+            cursor: pointer;
+            color: var(--text-dim);
+            font-size: 0.85em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.15s;
+            border: none;
+            background: none;
+            font-family: inherit;
+        }
+
+        .pack-item-remove:hover {
+            color: var(--ruby);
+            background: var(--ruby-dim);
+        }
+
+        /* Pack total box */
+        .pack-total {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-strong);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pack-total::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--gold-glow) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .pack-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            position: relative;
+        }
+
+        .pack-total-row + .pack-total-row {
+            margin-top: 4px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        .pack-total-label {
+            font-size: 0.82em;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+        }
+
+        .pack-total-value {
+            font-weight: 700;
+            font-size: 1.05em;
+            color: var(--gold-400);
+        }
+
+        .pack-total-value-thb {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.2em;
+            color: var(--emerald);
+        }
+
+        /* ═══════════════════════════════════════════════
+           RIGHT PANEL — ITEM CATALOG
+           ═══════════════════════════════════════════════ */
+        .category-header {
+            font-family: 'Cinzel', serif;
+            font-weight: 500;
+            font-size: 0.72em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 12px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-header:first-child { padding-top: 0; }
+
+        .category-header::before {
+            content: "";
+            width: 12px;
+            height: 1px;
+            background: var(--gold-700);
+        }
+
+        .catalog-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 12px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .catalog-item:hover {
+            background: var(--bg-elevated);
+            border-color: var(--border);
+        }
+
+        .catalog-item.active {
+            border-color: var(--gold-glow-strong);
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.05), var(--bg-card));
+        }
+
+        .catalog-item-info { flex: 1; min-width: 0; }
+
+        .catalog-item-name {
+            font-weight: 500;
+            font-size: 0.88em;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .catalog-item-gems {
+            font-size: 0.75em;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 1px;
+        }
+
+        .catalog-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+
+        .catalog-item-qty {
+            width: 38px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9em;
+            color: var(--emerald);
+            font-variant-numeric: tabular-nums;
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 0;
+            font-family: inherit;
+            outline: none;
+            -moz-appearance: textfield;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .catalog-item-qty:focus {
+            border-color: var(--gold-700);
+            box-shadow: 0 0 0 2px var(--gold-glow);
+        }
+
+        .catalog-item-qty.zero { color: var(--text-dim); }
+
+        /* Hide number input arrows */
+        .catalog-item-qty::-webkit-outer-spin-button,
+        .catalog-item-qty::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .btn:active { transform: scale(0.9); }
+
+        .btn-add {
+            background: linear-gradient(135deg, var(--gold-900), var(--gold-700));
+            color: var(--gold-200);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .btn-add:hover {
+            background: linear-gradient(135deg, var(--gold-700), var(--gold));
+            color: #fff;
+            box-shadow: 0 2px 10px var(--gold-glow-strong);
+        }
+
+        .btn-sub {
+            background: var(--bg-deep);
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+
+        .btn-sub:hover {
+            background: var(--bg-hover);
+            color: var(--text-muted);
+            border-color: var(--border-strong);
+        }
+
+        .btn-sub.disabled {
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        /* ═══════════════════════════════════════════════
+           BOTTOM BAR
+           ═══════════════════════════════════════════════ */
+        footer {
+            position: relative;
+            padding: 16px 24px;
+            background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-deep) 100%);
+            border-top: 1px solid var(--border-strong);
+            z-index: 10;
+        }
+
+        footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-700), transparent);
+        }
+
+        .footer-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.78em;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrap input {
+            padding: 9px 46px 9px 14px;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
+            background: var(--bg-abyss);
+            color: var(--gold-200);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            width: 140px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-wrap input::placeholder { color: var(--text-dim); font-weight: 400; }
+        .input-wrap input:focus {
+            outline: none;
+            border-color: var(--gold-700);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 12px;
+            font-size: 0.8em;
+            color: var(--text-dim);
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        .btn-calc {
+            padding: 9px 24px;
+            background: linear-gradient(135deg, var(--gold-900), var(--gold-700), var(--gold));
+            color: var(--bg-abyss);
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            box-shadow: 0 2px 12px rgba(201, 168, 76, 0.2);
+        }
+
+        .btn-calc:hover {
+            box-shadow: 0 4px 20px rgba(201, 168, 76, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-calc:active { transform: translateY(0) scale(0.98); }
+
+        .btn-clear {
+            padding: 9px 16px;
+            background: none;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.82em;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .btn-clear:hover {
+            color: var(--text-muted);
+            border-color: var(--border-strong);
+            background: var(--bg-card);
+        }
+
+        /* ═══════════════════════════════════════════════
+           RESULT DISPLAY
+           ═══════════════════════════════════════════════ */
+        .result {
+            margin-top: 14px;
+            animation: fadeUp 0.35s ease-out;
+        }
+
+        .result:empty { margin-top: 0; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-strong);
+        }
+
+        .result-stat { display: flex; flex-direction: column; gap: 2px; }
+        .result-stat-label { font-size: 0.7em; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .result-stat-value { font-weight: 700; font-size: 1em; color: var(--text-muted); }
+
+        .result-divider {
+            width: 1px;
+            height: 32px;
+            background: var(--border-strong);
+        }
+
+        .result-savings {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .result-savings-pct {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.5em;
+            line-height: 1;
+        }
+
+        .result-savings-pct.positive { color: var(--emerald); }
+        .result-savings-pct.negative { color: var(--ruby); }
+
+        .result-savings-amount {
+            font-size: 0.78em;
+            color: var(--text-muted);
+        }
+
+        .deal-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .deal-mythic {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.15));
+            color: #e9d5ff;
+            border: 1px solid #7c3aed;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+        }
+
+        .deal-legendary {
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.2), rgba(240, 215, 140, 0.1));
+            color: var(--gold-200);
+            border: 1px solid var(--gold-700);
+            box-shadow: 0 0 16px var(--gold-glow);
+        }
+
+        .deal-great {
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--emerald);
+            border: 1px solid var(--emerald-dim);
+        }
+
+        .deal-good {
+            background: rgba(74, 222, 128, 0.1);
+            color: #86efac;
+            border: 1px solid #166534;
+        }
+
+        .deal-okay {
+            background: rgba(250, 204, 21, 0.1);
+            color: #fde047;
+            border: 1px solid #854d0e;
+        }
+
+        .deal-bad {
+            background: rgba(248, 113, 113, 0.1);
+            color: var(--ruby);
+            border: 1px solid var(--ruby-dim);
+        }
+
+        .result-error {
+            font-size: 0.88em;
+            color: var(--ruby);
+            padding: 8px 0;
+        }
+
+        /* Deal meter bar */
+        .deal-meter {
+            flex: 1;
+            min-width: 80px;
+            max-width: 160px;
+            height: 6px;
+            background: var(--bg-deep);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .deal-meter-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease-out;
+        }
+
+        .deal-meter-fill.mythic {
+            background: linear-gradient(90deg, #7c3aed, #a855f7, #d946ef);
+        }
+
+        .deal-meter-fill.legendary {
+            background: linear-gradient(90deg, var(--gold-900), var(--gold), var(--gold-200));
+        }
+
+        .deal-meter-fill.positive {
+            background: linear-gradient(90deg, var(--emerald-dim), var(--emerald));
+        }
+
+        .deal-meter-fill.negative {
+            background: linear-gradient(90deg, var(--ruby-dim), var(--ruby));
+        }
+
+        /* ═══════════════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════════════ */
+        @media (max-width: 700px) {
+            main { flex-direction: column; }
+            .panel-left, .panel-right {
+                max-width: 100%;
+                max-height: 45vh;
+            }
+            .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
+            .result-card { gap: 14px; }
+            .result-divider { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="title">CoC Pack Calculator</h1>
+        <p id="subtitle">Calculate store pack value vs buying gems</p>
+        <p class="disclaimer" id="disclaimer">Please verify pack value yourself before making a purchase</p>
+        <button class="lang-toggle" id="lang-toggle" title="Switch language">EN</button>
+    </header>
+
+    <main>
+        <section class="panel panel-left">
+            <div class="section-title" id="pack-title"></div>
+            <div id="pack-list"></div>
+            <div id="pack-total" style="display:none;" class="pack-total">
+                <div class="pack-total-row">
+                    <span class="pack-total-label" id="label-total-gems"></span>
+                    <span class="pack-total-value" id="total-gems">0</span>
+                </div>
+                <div class="pack-total-row">
+                    <span class="pack-total-label" id="label-original-price"></span>
+                    <span class="pack-total-value-thb" id="total-thb">0 THB</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel panel-right">
+            <div class="section-title" id="catalog-title"></div>
+            <div id="catalog"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-row">
+            <div class="input-group">
+                <label id="label-sale-price"></label>
+                <div class="input-wrap">
+                    <input type="number" id="sale-price" placeholder="0" min="0">
+                    <span class="input-suffix">THB</span>
+                </div>
+            </div>
+            <button class="btn-calc" id="btn-calc"></button>
+            <button class="btn-clear" id="btn-clear"></button>
+        </div>
+        <div id="result"></div>
+    </footer>
+
+    <script>
+        /* ═══════════════════════════════════
+           I18N
+           ═══════════════════════════════════ */
+        const i18n = {
+            th: {
+                title: 'เครื่องมือคำนวนความคุ้มแพ็คในเกม Clash of Clans',
+                subtitle: 'คำนวณความคุ้มค่าแพ็คในร้านค้า เปรียบเทียบกับการซื้ออัญมณี',
+                disclaimer: 'โปรดตรวจสอบความคุ้มค่าด้วยตนเองก่อนทำการซื้อแพ็คเกจ',
+                yourPack: 'แพ็คของคุณ',
+                itemCatalog: 'รายการไอเทม',
+                totalGems: 'อัญมณีรวม',
+                originalPrice: 'ราคาเดิม',
+                salePrice: 'ราคาขายแพ็ค',
+                calculate: 'คำนวณ',
+                clearAll: 'ล้างทั้งหมด',
+                emptyPack: 'เลือกไอเทมจากรายการเพื่อสร้างแพ็คของคุณ',
+                gems: 'อัญมณี',
+                original: 'ราคาเดิม',
+                sale: 'ราคาขาย',
+                youSave: 'คุณประหยัด',
+                youOverpay: 'คุณจ่ายเกิน',
+                mythic: 'ระดับเทพ',
+                legendary: 'ตำนาน',
+                great: 'คุ้มมาก',
+                good: 'คุ้ม',
+                okay: 'พอใช้',
+                bad: 'ไม่คุ้ม',
+                errNoItems: 'เพิ่มไอเทมในแพ็คก่อน',
+                errNoPrice: 'กรอกราคาขายที่ถูกต้อง',
+                langBtn: 'EN',
+                categories: { books: 'ตำรา', potions: 'น้ำยา', runes: 'รูน', ores: 'แร่', other: 'อื่นๆ' },
+            },
+            en: {
+                title: 'CoC Pack Calculator',
+                subtitle: 'Calculate store pack value vs buying gems',
+                disclaimer: 'Please verify pack value yourself before making a purchase',
+                yourPack: 'Your Pack',
+                itemCatalog: 'Item Catalog',
+                totalGems: 'Total Gems',
+                originalPrice: 'Original Price',
+                salePrice: 'Pack Sale Price',
+                calculate: 'Calculate',
+                clearAll: 'Clear All',
+                emptyPack: 'Select items from the catalog to build your pack',
+                gems: 'gems',
+                original: 'Original',
+                sale: 'Sale',
+                youSave: 'You save',
+                youOverpay: 'You overpay',
+                mythic: 'Mythic',
+                legendary: 'Legendary',
+                great: 'Great',
+                good: 'Good',
+                okay: 'Okay',
+                bad: 'Bad Deal',
+                errNoItems: 'Add items to the pack first',
+                errNoPrice: 'Enter a valid sale price',
+                langBtn: 'TH',
+                categories: { books: 'Books', potions: 'Potions', runes: 'Runes', ores: 'Ores', other: 'Other' },
+            },
+        };
+
+        let lang = 'th';
+        function t(key) { return i18n[lang][key]; }
+
+        /* ═══════════════════════════════════
+           DATA
+           ═══════════════════════════════════ */
+        const items = [
+            { en: "Book of Building", th: "ตำราสิ่งก่อสร้าง", gems: 925, cat: "books" },
+            { en: "Book of Fighting", th: "ตำราการต่อสู้", gems: 925, cat: "books" },
+            { en: "Book of Spell", th: "ตำราอาคม", gems: 925, cat: "books" },
+            { en: "Book of Everything", th: "ตำราสรรพสิ่ง", gems: 925, cat: "books" },
+            { en: "Book of Hero", th: "ตำราผู้กล้า", gems: 500, cat: "books" },
+            { en: "Power Potion", th: "น้ำยาพลัง", gems: 300, cat: "potions" },
+            { en: "Resource Potion", th: "น้ำยาทรัพยากร", gems: 500, cat: "potions" },
+            { en: "Builder Potion", th: "น้ำยาช่างก่อสร้าง", gems: 285, cat: "potions" },
+            { en: "Clock Potion", th: "น้ำยาหอนาฬิกา", gems: 75, cat: "potions" },
+            { en: "Hero Potion", th: "น้ำยาผู้กล้า", gems: 300, cat: "potions" },
+            { en: "Research Potion", th: "น้ำยาวิจัย", gems: 120, cat: "potions" },
+            { en: "Super Potion", th: "ซูเปอร์น้ำยา", gems: 300, cat: "potions" },
+            { en: "Rune of Gold", th: "รูนทองคำ", gems: 1000, cat: "runes" },
+            { en: "Rune of Elixir", th: "รูนน้ำอมฤต", gems: 1000, cat: "runes" },
+            { en: "Rune of Dark Elixir", th: "รูนน้ำอมฤตมืด", gems: 2000, cat: "runes" },
+            { en: "Wall Ring", th: "แหวนกำแพง", gems: 35, cat: "other" },
+            { en: "Shovel", th: "พลั่วแห่งสิ่งกีดขวาง", gems: 500, cat: "other" },
+            { en: "Shiny Ore", th: "แร่วิบวับ", gems: 1, cat: "ores" },
+            { en: "Glowy Ore", th: "แร่เรืองรอง", gems: 5, cat: "ores" },
+            { en: "Starry Ore", th: "แร่ประกายดาว", gems: 35, cat: "ores" },
+        ];
+
+        function itemName(item) { return item[lang]; }
+
+        const categories = [
+            { key: "books" },
+            { key: "potions" },
+            { key: "runes" },
+            { key: "ores" },
+            { key: "other" },
+        ];
+
+        const gemPacks = [
+            { gems: 80, thb: 19 },
+            { gems: 500, thb: 89 },
+            { gems: 1200, thb: 179 },
+            { gems: 1850, thb: 269 },
+            { gems: 2500, thb: 349 },
+            { gems: 6500, thb: 899 },
+            { gems: 14000, thb: 1800 },
+            { gems: 30000, thb: 3700 },
+        ];
+
+        /* ═══════════════════════════════════
+           STATE
+           ═══════════════════════════════════ */
+        const pack = new Array(items.length).fill(0);
+
+        /* ═══════════════════════════════════
+           GEM → THB CONVERSION (DP)
+           ═══════════════════════════════════ */
+        const dpCache = new Map();
+
+        function gemsToTHB(totalGems) {
+            if (totalGems <= 0) return 0;
+            if (dpCache.has(totalGems)) return dpCache.get(totalGems);
+
+            let baseCost = 0;
+            let remaining = totalGems;
+
+            if (remaining > 30000) {
+                const count = Math.floor(remaining / 30000);
+                baseCost = count * 3700;
+                remaining = remaining % 30000;
+            }
+
+            if (remaining === 0) { dpCache.set(totalGems, baseCost); return baseCost; }
+
+            const dp = new Array(remaining + 1).fill(Infinity);
+            dp[0] = 0;
+
+            for (let i = 1; i <= remaining; i++) {
+                for (const p of gemPacks) {
+                    const prev = Math.max(0, i - p.gems);
+                    const cost = dp[prev] + p.thb;
+                    if (cost < dp[i]) dp[i] = cost;
+                }
+            }
+
+            const result = baseCost + dp[remaining];
+            dpCache.set(totalGems, result);
+            return result;
+        }
+
+        /* ═══════════════════════════════════
+           RENDER
+           ═══════════════════════════════════ */
+        function getTotalGems() {
+            return pack.reduce((sum, qty, i) => sum + qty * items[i].gems, 0);
+        }
+
+        function renderUI() {
+            document.getElementById('title').textContent = t('title');
+            document.getElementById('subtitle').textContent = t('subtitle');
+            document.getElementById('disclaimer').textContent = t('disclaimer');
+            document.getElementById('pack-title').textContent = t('yourPack');
+            document.getElementById('catalog-title').textContent = t('itemCatalog');
+            document.getElementById('label-total-gems').textContent = t('totalGems');
+            document.getElementById('label-original-price').textContent = t('originalPrice');
+            document.getElementById('label-sale-price').textContent = t('salePrice');
+            document.getElementById('btn-calc').textContent = t('calculate');
+            document.getElementById('btn-clear').textContent = t('clearAll');
+            document.getElementById('lang-toggle').textContent = t('langBtn');
+        }
+
+        function render() {
+            renderUI();
+            renderPack();
+            renderCatalog();
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function renderPack() {
+            const listEl = document.getElementById('pack-list');
+            const totalEl = document.getElementById('pack-total');
+            const hasItems = pack.some(q => q > 0);
+
+            if (!hasItems) {
+                listEl.innerHTML = `<div class="pack-empty">${t('emptyPack')}</div>`;
+                totalEl.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            let totalGemsVal = 0;
+
+            for (let i = 0; i < items.length; i++) {
+                if (pack[i] > 0) {
+                    const itemGems = items[i].gems * pack[i];
+                    totalGemsVal += itemGems;
+                    html += `<div class="pack-item">
+                        <div>
+                            <div class="pack-item-name">${itemName(items[i])} &times;${pack[i]}</div>
+                            <div class="pack-item-detail"><span class="gem-dot"></span>${itemGems.toLocaleString()} ${t('gems')}</div>
+                        </div>
+                        <button class="pack-item-remove" data-remove="${i}">&times;</button>
+                    </div>`;
+                }
+            }
+
+            listEl.innerHTML = html;
+            totalEl.style.display = 'block';
+            document.getElementById('total-gems').textContent = totalGemsVal.toLocaleString();
+            document.getElementById('total-thb').textContent = gemsToTHB(totalGemsVal).toLocaleString() + ' THB';
+        }
+
+        function renderCatalog() {
+            const catalogEl = document.getElementById('catalog');
+            let html = '';
+
+            for (const cat of categories) {
+                html += `<div class="category-header">${t('categories')[cat.key]}</div>`;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].cat !== cat.key) continue;
+                    const qty = pack[i];
+                    const isActive = qty > 0;
+                    html += `<div class="catalog-item${isActive ? ' active' : ''}">
+                        <div class="catalog-item-info">
+                            <div class="catalog-item-name">${itemName(items[i])}</div>
+                            <div class="catalog-item-gems"><span class="gem-dot"></span>${items[i].gems} ${t('gems')}</div>
+                        </div>
+                        <div class="catalog-item-controls">
+                            <button class="btn btn-sub${qty === 0 ? ' disabled' : ''}" data-sub="${i}">&minus;</button>
+                            <input type="number" class="catalog-item-qty${qty === 0 ? ' zero' : ''}" value="${qty}" min="0" data-qty="${i}">
+                            <button class="btn btn-add" data-add="${i}">+</button>
+                        </div>
+                    </div>`;
+                }
+            }
+
+            catalogEl.innerHTML = html;
+        }
+
+        /* ═══════════════════════════════════
+           CALCULATE
+           ═══════════════════════════════════ */
+        function calculate() {
+            const totalGems = getTotalGems();
+            const resultEl = document.getElementById('result');
+
+            if (totalGems === 0) {
+                resultEl.innerHTML = `<div class="result-error">${t('errNoItems')}</div>`;
+                return;
+            }
+
+            const salePrice = parseFloat(document.getElementById('sale-price').value);
+            if (isNaN(salePrice) || salePrice < 0) {
+                resultEl.innerHTML = `<div class="result-error">${t('errNoPrice')}</div>`;
+                return;
+            }
+
+            const originalTHB = gemsToTHB(totalGems);
+            const savings = originalTHB - salePrice;
+            const pct = originalTHB > 0 ? ((savings / originalTHB) * 100) : 0;
+            const pctAbs = Math.abs(pct).toFixed(1);
+            const isPositive = savings >= 0;
+
+            let dealLabel, dealClass, meterClass;
+            if (pct >= 96) { dealLabel = t('mythic'); dealClass = 'deal-mythic'; meterClass = 'mythic'; }
+            else if (pct >= 86) { dealLabel = t('legendary'); dealClass = 'deal-legendary'; meterClass = 'legendary'; }
+            else if (pct >= 71) { dealLabel = t('great'); dealClass = 'deal-great'; meterClass = 'positive'; }
+            else if (pct >= 51) { dealLabel = t('good'); dealClass = 'deal-good'; meterClass = 'positive'; }
+            else if (pct >= 31) { dealLabel = t('okay'); dealClass = 'deal-okay'; meterClass = 'positive'; }
+            else { dealLabel = t('bad'); dealClass = 'deal-bad'; meterClass = 'negative'; }
+
+            const meterWidth = Math.min(100, Math.max(0, pct));
+            const saveText = isPositive ? t('youSave') : t('youOverpay');
+
+            resultEl.innerHTML = `<div class="result" style="margin-top:14px;">
+                <div class="result-card">
+                    <div class="result-stat">
+                        <span class="result-stat-label">${t('original')}</span>
+                        <span class="result-stat-value">${originalTHB.toLocaleString()} THB</span>
+                    </div>
+                    <div class="result-divider"></div>
+                    <div class="result-stat">
+                        <span class="result-stat-label">${t('sale')}</span>
+                        <span class="result-stat-value">${salePrice.toLocaleString()} THB</span>
+                    </div>
+                    <div class="result-divider"></div>
+                    <div class="result-savings">
+                        <span class="result-savings-pct ${isPositive ? 'positive' : 'negative'}">${isPositive ? '' : '-'}${pctAbs}%</span>
+                        <span class="result-savings-amount">${saveText} ${Math.abs(savings).toLocaleString()} THB</span>
+                    </div>
+                    <div class="deal-meter">
+                        <div class="deal-meter-fill ${meterClass}" style="width:${meterWidth}%"></div>
+                    </div>
+                    <span class="deal-tag ${dealClass}">${dealLabel}</span>
+                </div>
+            </div>`;
+        }
+
+        /* ═══════════════════════════════════
+           EVENT HANDLERS
+           ═══════════════════════════════════ */
+        document.getElementById('catalog').addEventListener('click', (e) => {
+            const addBtn = e.target.closest('[data-add]');
+            const subBtn = e.target.closest('[data-sub]');
+            if (addBtn) {
+                pack[parseInt(addBtn.dataset.add)]++;
+                render();
+            } else if (subBtn) {
+                const idx = parseInt(subBtn.dataset.sub);
+                pack[idx] = Math.max(0, pack[idx] - 1);
+                render();
+            }
+        });
+
+        document.getElementById('catalog').addEventListener('input', (e) => {
+            const qtyInput = e.target.closest('[data-qty]');
+            if (!qtyInput) return;
+            const idx = parseInt(qtyInput.dataset.qty);
+            const val = parseInt(qtyInput.value);
+            pack[idx] = isNaN(val) || val < 0 ? 0 : val;
+            renderPack();
+            // Update active state and minus button without losing focus
+            const item = qtyInput.closest('.catalog-item');
+            item.classList.toggle('active', pack[idx] > 0);
+            qtyInput.classList.toggle('zero', pack[idx] === 0);
+            const subBtn = item.querySelector('[data-sub]');
+            subBtn.classList.toggle('disabled', pack[idx] === 0);
+        });
+
+        document.getElementById('pack-list').addEventListener('click', (e) => {
+            const removeBtn = e.target.closest('[data-remove]');
+            if (removeBtn) {
+                pack[parseInt(removeBtn.dataset.remove)] = 0;
+                render();
+            }
+        });
+
+        document.getElementById('btn-calc').addEventListener('click', calculate);
+
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            pack.fill(0);
+            document.getElementById('sale-price').value = '';
+            render();
+        });
+
+        document.getElementById('sale-price').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') calculate();
+        });
+
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            lang = lang === 'th' ? 'en' : 'th';
+            render();
+        });
+
+        /* Init */
+        render();
+    </script>
+</body>
+</html>
