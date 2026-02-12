@@ -80,7 +80,7 @@
         header {
             position: relative;
             text-align: center;
-            padding: 20px 20px 18px;
+            padding: 12px 20px;
             background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-deep) 100%);
             border-bottom: 1px solid var(--border-strong);
             z-index: 10;
@@ -100,7 +100,7 @@
         header h1 {
             font-family: 'Cinzel', serif;
             font-weight: 700;
-            font-size: 1.35em;
+            font-size: 1.2em;
             letter-spacing: 3px;
             text-transform: uppercase;
             background: linear-gradient(135deg, var(--gold-700), var(--gold-200), var(--gold), var(--gold-200), var(--gold-700));
@@ -112,18 +112,11 @@
         }
 
         header p {
-            color: var(--text-muted);
-            font-size: 0.82em;
-            margin-top: 4px;
-            letter-spacing: 0.5px;
+            display: none;
         }
 
         header .disclaimer {
-            color: var(--text-dim);
-            font-size: 0.72em;
-            margin-top: 6px;
-            font-style: italic;
-            opacity: 0.8;
+            display: none;
         }
 
         .lang-toggle {
@@ -822,9 +815,9 @@
            ═══════════════════════════════════ */
         const i18n = {
             th: {
-                title: 'เครื่องมือคำนวนความคุ้มแพ็คในเกม Clash of Clans',
-                subtitle: 'คำนวณความคุ้มค่าแพ็คในร้านค้า เปรียบเทียบกับการซื้ออัญมณี',
-                disclaimer: 'โปรดตรวจสอบความคุ้มค่าด้วยตนเองก่อนทำการซื้อแพ็คเกจ',
+                title: 'คำนวณความคุ้ม',
+                subtitle: '',
+                disclaimer: '',
                 yourPack: 'แพ็คของคุณ',
                 itemCatalog: 'รายการไอเทม',
                 totalGems: 'อัญมณีรวม',
@@ -850,9 +843,9 @@
                 categories: { books: 'ตำรา', potions: 'น้ำยา', runes: 'รูน', ores: 'แร่', other: 'อื่นๆ' },
             },
             en: {
-                title: 'CoC Pack Calculator',
-                subtitle: 'Calculate store pack value vs buying gems',
-                disclaimer: 'Please verify pack value yourself before making a purchase',
+                title: 'Pack Value',
+                subtitle: '',
+                disclaimer: '',
                 yourPack: 'Your Pack',
                 itemCatalog: 'Item Catalog',
                 totalGems: 'Total Gems',
