@@ -50,6 +50,7 @@
             background: var(--bg-abyss);
             color: var(--text);
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -1187,7 +1188,7 @@
 
             .panel-left {
                 flex: 0 0 auto;
-                max-height: 32svh;
+                max-height: 34svh;
                 border-right: none;
                 border-bottom: 1px solid var(--border);
             }
@@ -1203,6 +1204,21 @@
 
             .pack-empty {
                 padding: 34px 18px;
+            }
+
+            .pack-total {
+                position: relative;
+                bottom: auto;
+                margin-top: 10px;
+                padding: 12px;
+            }
+
+            .pack-total-value {
+                font-size: 1em;
+            }
+
+            .pack-total-value-thb {
+                font-size: 1.05em;
             }
 
             .catalog-item {
@@ -1225,13 +1241,14 @@
             }
 
             footer {
-                padding: 12px 16px;
+                padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
+                flex: 0 0 auto;
             }
 
             .footer-row {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 10px;
+                gap: 8px 10px;
                 align-items: stretch;
             }
 
@@ -1245,28 +1262,28 @@
             .input-wrap input {
                 width: 100%;
                 max-width: none;
-                min-height: 42px;
+                min-height: 40px;
             }
 
             .btn-calc, .btn-clear {
                 width: 100%;
                 min-width: 0;
-                min-height: 42px;
-                padding: 12px 16px;
+                min-height: 40px;
+                padding: 10px 16px;
                 font-size: 0.85em;
             }
 
             .result {
                 max-height: none;
-                margin-top: 10px;
+                margin-top: 8px;
             }
 
             .result-card {
                 display: grid;
                 grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-                gap: 10px 12px;
+                gap: 8px 10px;
                 align-items: center;
-                padding: 12px;
+                padding: 10px;
             }
 
             .result-divider { display: none; }
@@ -1277,27 +1294,29 @@
             }
 
             .result-stat-value {
-                font-size: 0.95em;
+                font-size: 0.92em;
             }
 
             .result-savings {
                 grid-column: 1;
                 width: auto;
                 min-width: 0;
+                gap: 1px;
             }
 
             .result-savings-pct {
-                font-size: 1.32em;
+                font-size: 1.24em;
             }
 
             .result-savings-amount {
-                font-size: 0.76em;
+                font-size: 0.68em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .deal-meter {
-                grid-column: 1 / -1;
-                width: 100%;
-                max-width: 100%;
+                display: none;
             }
 
             .deal-tag {
@@ -1308,6 +1327,9 @@
                 max-width: 100%;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                padding: 4px 9px;
+                font-size: 0.58em;
+                letter-spacing: 1.2px;
             }
 
             .info-dialog {
@@ -1340,6 +1362,11 @@
 
             .panel {
                 padding: 14px;
+            }
+
+            footer {
+                padding-left: 14px;
+                padding-right: 14px;
             }
 
             .catalog-item {
@@ -1785,7 +1812,7 @@
             const meterWidth = Math.min(100, Math.max(0, pctRounded));
             const saveText = isPositive ? t('youSave') : t('youOverpay');
 
-            resultEl.innerHTML = `<div class="result" style="margin-top:14px;">
+            resultEl.innerHTML = `<div class="result">
                 <div class="result-card">
                     <div class="result-stat">
                         <span class="result-stat-label">${t('original')}</span>
