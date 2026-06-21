@@ -1757,6 +1757,7 @@
                     const itemGems = items[i].gems * pack[i];
                     totalGemsVal += itemGems;
                     html += `<div class="pack-item">
+                        <div class="catalog-item-icon"><img src="images/${items[i].img}" alt="" aria-hidden="true" loading="lazy"></div>
                         <div>
                             <div class="pack-item-name">${itemName(items[i])} &times;${pack[i]}</div>
                             <div class="pack-item-detail"><span class="gem-dot"></span>${itemGems.toLocaleString()} ${t('gems')}</div>
