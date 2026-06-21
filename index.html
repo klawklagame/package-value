@@ -505,6 +505,26 @@
             background: linear-gradient(135deg, rgba(201, 168, 76, 0.08), var(--bg-elevated));
         }
 
+        .catalog-item-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            background: var(--bg-inset);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .catalog-item-icon img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            image-rendering: auto;
+        }
+
         .catalog-item-info { flex: 1; min-width: 0; }
 
         .catalog-item-name {
@@ -1547,26 +1567,26 @@
            DATA
            ═══════════════════════════════════ */
         const items = [
-            { en: "Book of Everything", th: "ตำราสรรพสิ่ง", gems: 925, cat: "books" },
-            { en: "Book of Building", th: "ตำราสิ่งก่อสร้าง", gems: 925, cat: "books" },
-            { en: "Book of Fighting", th: "ตำราการต่อสู้", gems: 925, cat: "books" },
-            { en: "Book of Spell", th: "ตำราอาคม", gems: 925, cat: "books" },
-            { en: "Book of Hero", th: "ตำราผู้กล้า", gems: 500, cat: "books" },
-            { en: "Builder Potion", th: "น้ำยาช่างก่อสร้าง", gems: 285, cat: "potions" },
-            { en: "Research Potion", th: "น้ำยาวิจัย", gems: 120, cat: "potions" },
-            { en: "Hero Potion", th: "น้ำยาผู้กล้า", gems: 300, cat: "potions" },
-            { en: "Power Potion", th: "น้ำยาพลัง", gems: 300, cat: "potions" },
-            { en: "Resource Potion", th: "น้ำยาทรัพยากร", gems: 500, cat: "potions" },
-            { en: "Super Potion", th: "ซูเปอร์น้ำยา", gems: 300, cat: "potions" },
-            { en: "Clock Potion", th: "น้ำยาหอนาฬิกา", gems: 75, cat: "potions" },
-            { en: "Rune of Dark Elixir", th: "รูนน้ำอมฤตมืด", gems: 2000, cat: "runes" },
-            { en: "Rune of Gold", th: "รูนทองคำ", gems: 1000, cat: "runes" },
-            { en: "Rune of Elixir", th: "รูนน้ำอมฤต", gems: 1000, cat: "runes" },
-            { en: "Wall Ring", th: "แหวนกำแพง", gems: 35, cat: "other" },
-            { en: "Shovel", th: "พลั่วแห่งสิ่งกีดขวาง", gems: 500, cat: "other" },
-            { en: "Shiny Ore", th: "แร่วิบวับ", gems: 1, cat: "ores" },
-            { en: "Glowy Ore", th: "แร่เรืองรอง", gems: 5, cat: "ores" },
-            { en: "Starry Ore", th: "แร่ประกายดาว", gems: 35, cat: "ores" },
+            { en: "Book of Everything", th: "ตำราสรรพสิ่ง", gems: 925, cat: "books", img: "bookofeverything.webp" },
+            { en: "Book of Building", th: "ตำราสิ่งก่อสร้าง", gems: 925, cat: "books", img: "bookofbuilding.webp" },
+            { en: "Book of Fighting", th: "ตำราการต่อสู้", gems: 925, cat: "books", img: "bookoffighting.webp" },
+            { en: "Book of Spell", th: "ตำราอาคม", gems: 925, cat: "books", img: "bookofspells.webp" },
+            { en: "Book of Hero", th: "ตำราผู้กล้า", gems: 500, cat: "books", img: "bookofheroes.webp" },
+            { en: "Builder Potion", th: "น้ำยาช่างก่อสร้าง", gems: 285, cat: "potions", img: "builderpotion.webp" },
+            { en: "Research Potion", th: "น้ำยาวิจัย", gems: 120, cat: "potions", img: "researchpotion.webp" },
+            { en: "Hero Potion", th: "น้ำยาผู้กล้า", gems: 300, cat: "potions", img: "heropotion.webp" },
+            { en: "Power Potion", th: "น้ำยาพลัง", gems: 300, cat: "potions", img: "powerpotion.webp" },
+            { en: "Resource Potion", th: "น้ำยาทรัพยากร", gems: 500, cat: "potions", img: "resourcepotion.webp" },
+            { en: "Super Potion", th: "ซูเปอร์น้ำยา", gems: 300, cat: "potions", img: "superpotion.webp" },
+            { en: "Clock Potion", th: "น้ำยาหอนาฬิกา", gems: 75, cat: "potions", img: "clocktowerpotion.webp" },
+            { en: "Rune of Dark Elixir", th: "รูนน้ำอมฤตมืด", gems: 2000, cat: "runes", img: "runeofdarkelixir.webp" },
+            { en: "Rune of Gold", th: "รูนทองคำ", gems: 1000, cat: "runes", img: "runeofgold.webp" },
+            { en: "Rune of Elixir", th: "รูนน้ำอมฤต", gems: 1000, cat: "runes", img: "runeofelixir.webp" },
+            { en: "Wall Ring", th: "แหวนกำแพง", gems: 35, cat: "other", img: "wallring.webp" },
+            { en: "Shovel", th: "พลั่วแห่งสิ่งกีดขวาง", gems: 500, cat: "other", img: "shovelofobstacles.webp" },
+            { en: "Shiny Ore", th: "แร่วิบวับ", gems: 1, cat: "ores", img: "shiny-ore.webp" },
+            { en: "Glowy Ore", th: "แร่เรืองรอง", gems: 5, cat: "ores", img: "glowy-ore.webp" },
+            { en: "Starry Ore", th: "แร่ประกายดาว", gems: 35, cat: "ores", img: "starry-ore.webp" },
         ];
 
         function itemName(item) { return item[lang]; }
@@ -1763,6 +1783,7 @@
                     const qty = pack[i];
                     const isActive = qty > 0;
                     html += `<div class="catalog-item${isActive ? ' active' : ''}">
+                        <div class="catalog-item-icon"><img src="images/${items[i].img}" alt="" aria-hidden="true" loading="lazy"></div>
                         <div class="catalog-item-info">
                             <div class="catalog-item-name">${itemName(items[i])}</div>
                             <div class="catalog-item-gems"><span class="gem-dot"></span>${items[i].gems} ${t('gems')}</div>
