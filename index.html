@@ -1,934 +1,242 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoC Pack Value Calculator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="คำนวณความคุ้มของแพ็คใน Clash of Clans เทียบกับการซื้อเพชรโดยตรงจากสโตร์">
+    <meta name="theme-color" content="#0f0b11">
+    <meta name="color-scheme" content="dark">
+    <title>คำนวณความคุ้ม · KLAWKLA</title>
+    <link rel="preload" href="fonts/FCKrungThep-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/FCMahaNakhonFlat-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="kk/tokens.css?v=1">
+    <link rel="stylesheet" href="kk/kk.css?v=3">
     <style>
         /* ═══════════════════════════════════════════════
-           TOKENS & RESET
+           PACK VALUE — layout on top of the KLAWKLA Tools system (kk/)
            ═══════════════════════════════════════════════ */
-        :root {
-            --bg: #0c0e12;
-            --surface: #13161c;
-            --surface-2: #191d25;
-            --surface-3: #20252f;
-            --border: #232833;
-            --border-strong: #303747;
-            --text: #e8eaee;
-            --muted: #8b919d;
-            --dim: #565c68;
-            --gold: #e0b64f;
-            --gold-soft: rgba(224, 182, 79, 0.12);
-            --green: #3ddc97;
-            --green-soft: rgba(61, 220, 151, 0.12);
-            --red: #ff7070;
-            --red-soft: rgba(255, 112, 112, 0.12);
-            --blue: #6aa8ff;
-            --purple: #c084fc;
-            --radius: 10px;
-            --radius-sm: 8px;
-        }
+        html, body { height: 100%; }
+        body { overflow: hidden; }
 
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'DM Sans', 'Noto Sans Thai', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        button { font-family: inherit; }
-        input { font-family: inherit; }
-
-        /* ═══════════════════════════════════════════════
-           HEADER
-           ═══════════════════════════════════════════════ */
-        header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            z-index: 10;
-        }
-
-        header h1 {
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            min-width: 0;
-            flex: 1;
-        }
-
-        header h1 .gem-dot { margin-right: 9px; width: 8px; height: 8px; vertical-align: 1px; }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .info-toggle,
-        .store-btn,
-        .lang-toggle {
-            height: 32px;
-            border: 1px solid var(--border-strong);
-            border-radius: var(--radius-sm);
-            background: var(--surface-2);
-            color: var(--muted);
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            white-space: nowrap;
-            padding: 0 12px;
-            transition: color 0.15s, border-color 0.15s, background 0.15s;
-        }
-
-        .info-toggle { width: 32px; padding: 0; border-radius: 999px; }
-
-        .info-toggle:hover,
-        .lang-toggle:hover {
-            color: var(--text);
-            border-color: var(--dim);
-            background: var(--surface-3);
-        }
-
-        .store-btn { color: var(--green); border-color: rgba(61, 220, 151, 0.28); }
-
-        .store-btn:hover {
-            background: var(--green-soft);
-            border-color: rgba(61, 220, 151, 0.5);
-        }
-
-        .info-toggle:active,
-        .store-btn:active,
-        .lang-toggle:active { transform: scale(0.95); }
-
-        /* ═══════════════════════════════════════════════
-           MAIN LAYOUT
-           ═══════════════════════════════════════════════ */
-        main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
+        /* Two panes: your pack | item catalog */
+        .pv-main {
+            flex: 1 1 auto;
             min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+            grid-template-rows: minmax(0, 1fr);
         }
-
-        .panel {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border-strong) transparent;
-            min-width: 0;
-        }
-
-        .panel::-webkit-scrollbar { width: 5px; }
-        .panel::-webkit-scrollbar-track { background: transparent; }
-        .panel::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
-
-        .panel-left {
-            max-width: 44%;
-            border-right: 1px solid var(--border);
-            background: var(--surface);
-        }
-
-        .panel-right { max-width: 56%; }
-
-        .section-title {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            margin-bottom: 14px;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            padding-bottom: 10px;
-        }
-
-        .panel-left .section-title { background: linear-gradient(180deg, var(--surface) 70%, transparent); }
-        .panel-right .section-title { background: linear-gradient(180deg, var(--bg) 70%, transparent); }
-
-        /* ═══════════════════════════════════════════════
-           LEFT PANEL — YOUR PACK
-           ═══════════════════════════════════════════════ */
-        .pack-empty {
-            color: var(--dim);
-            text-align: center;
-            padding: 48px 24px;
-            font-size: 0.88rem;
-            border: 1px dashed var(--border-strong);
-            border-radius: var(--radius);
-        }
-
-        .pack-item {
+        .pv-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+        .pv-pack { background: var(--surface); border-right: 1px solid var(--line); }
+        .pv-pane-head {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 6px;
-            animation: slideIn 0.2s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation: none !important; transition: none !important; }
-        }
-
-        .pack-item-body { flex: 1; min-width: 0; }
-
-        .pack-item-name {
-            font-weight: 600;
-            font-size: 0.88rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .pack-item-detail {
-            font-size: 0.78rem;
-            color: var(--muted);
-            margin-top: 1px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .gem-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background: var(--gold);
-            transform: rotate(45deg);
-            border-radius: 1px;
-            flex-shrink: 0;
-        }
-
-        .pack-item-remove {
-            cursor: pointer;
-            color: var(--dim);
-            font-size: 0.9rem;
-            width: 30px;
-            height: 30px;
-            border-radius: var(--radius-sm);
-            border: none;
-            background: none;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.15s, background 0.15s;
-        }
-
-        .pack-item-remove:hover { color: var(--red); background: var(--red-soft); }
-        .pack-item-remove:active { transform: scale(0.9); }
-
-        /* Pack total */
-        .pack-total {
-            margin-top: 12px;
-            padding: 14px 16px;
-            background: var(--surface-2);
-            border: 1px solid var(--border-strong);
-            border-radius: var(--radius);
-            position: sticky;
-            bottom: 0;
-            z-index: 3;
-        }
-
-        .pack-total-row {
-            display: flex;
-            justify-content: space-between;
             align-items: baseline;
-            padding: 3px 0;
+            justify-content: space-between;
+            gap: var(--space-3);
+            padding: var(--space-4) var(--space-5) var(--space-2);
         }
-
-        .pack-total-row + .pack-total-row {
-            margin-top: 6px;
-            padding-top: 9px;
-            border-top: 1px solid var(--border);
-        }
-
-        .pack-total-label { font-size: 0.8rem; color: var(--muted); }
-
-        .pack-total-value {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--gold);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .pack-total-value-thb {
-            font-weight: 700;
-            font-size: 1.15rem;
-            color: var(--text);
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* ═══════════════════════════════════════════════
-           RIGHT PANEL — ITEM CATALOG
-           ═══════════════════════════════════════════════ */
-        .category-header {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--dim);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            padding: 14px 0 8px;
-        }
-
-        .category-header:first-child { padding-top: 0; }
-
-        .catalog-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-height: 54px;
-            padding: 8px 12px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 6px;
-            transition: border-color 0.15s, background 0.15s;
-        }
-
-        .catalog-item:hover { border-color: var(--border-strong); }
-
-        .catalog-item.active {
-            border-color: rgba(224, 182, 79, 0.4);
-            background: linear-gradient(0deg, var(--gold-soft), var(--gold-soft)), var(--surface);
-        }
-
-        .catalog-item-icon {
-            width: 38px;
-            height: 38px;
-            flex-shrink: 0;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .catalog-item-icon img { width: 32px; height: 32px; object-fit: contain; }
-
-        .catalog-item-info { flex: 1; min-width: 0; }
-
-        .catalog-item-name {
-            font-weight: 500;
-            font-size: 0.88rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .catalog-item-gems {
-            font-size: 0.76rem;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 1px;
-        }
-
-        .catalog-item-controls {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex-shrink: 0;
-        }
-
-        .catalog-item-qty {
-            width: 44px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 0.88rem;
-            color: var(--text);
-            font-variant-numeric: tabular-nums;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 5px 0;
-            outline: none;
-            -moz-appearance: textfield;
-            transition: border-color 0.15s;
-        }
-
-        .catalog-item-qty:hover { border-color: var(--border-strong); }
-        .catalog-item-qty:focus { border-color: var(--gold); }
-        .catalog-item-qty.zero { color: var(--dim); font-weight: 500; }
-
-        .catalog-item-qty::-webkit-outer-spin-button,
-        .catalog-item-qty::-webkit-inner-spin-button,
-        #sale-price::-webkit-outer-spin-button,
-        #sale-price::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        #sale-price { -moz-appearance: textfield; }
-
-        .btn {
-            width: 30px;
-            height: 30px;
-            border: 1px solid var(--border-strong);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.15s, background 0.15s, border-color 0.15s;
-        }
-
-        .btn:active { transform: scale(0.9); }
-
-        .btn-add {
-            background: var(--gold-soft);
-            border-color: rgba(224, 182, 79, 0.35);
-            color: var(--gold);
-        }
-
-        .btn-add:hover {
-            background: rgba(224, 182, 79, 0.22);
-            border-color: var(--gold);
-        }
-
-        .btn-sub {
-            background: var(--surface-2);
-            color: var(--muted);
-        }
-
-        .btn-sub:hover { color: var(--text); border-color: var(--dim); }
-
-        .btn-sub.disabled { opacity: 0.3; pointer-events: none; }
-
-        /* Focus visibility */
-        .btn:focus-visible,
-        .btn-clear:focus-visible,
-        .info-toggle:focus-visible,
-        .store-btn:focus-visible,
-        .lang-toggle:focus-visible,
-        .info-close:focus-visible {
-            outline: 2px solid var(--gold);
-            outline-offset: 2px;
-        }
-
-        .pack-item-remove:focus-visible {
-            outline: 2px solid var(--red);
-            outline-offset: 2px;
-        }
-
-        /* ═══════════════════════════════════════════════
-           FOOTER — PRICE + LIVE RESULT
-           ═══════════════════════════════════════════════ */
-        footer {
-            padding: 14px 20px;
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            z-index: 10;
-        }
-
-        .footer-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-            max-width: 1040px;
-            margin: 0 auto;
-        }
-
-        .input-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .input-group label {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--muted);
-            white-space: nowrap;
-        }
-
-        .input-wrap { position: relative; display: flex; align-items: center; }
-
-        .input-wrap input {
-            padding: 9px 48px 9px 14px;
-            border: 1px solid var(--border-strong);
-            border-radius: var(--radius-sm);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 15px;
-            font-weight: 600;
-            font-variant-numeric: tabular-nums;
-            width: 150px;
-            transition: border-color 0.15s;
-        }
-
-        .input-wrap input::placeholder { color: var(--dim); font-weight: 400; }
-        .input-wrap input:focus { outline: none; border-color: var(--gold); }
-
-        .input-suffix {
-            position: absolute;
-            right: 12px;
-            font-size: 0.78rem;
-            color: var(--dim);
-            font-weight: 500;
-            pointer-events: none;
-        }
-
-        .btn-clear {
-            padding: 9px 16px;
-            background: none;
-            color: var(--muted);
-            border: 1px solid var(--border-strong);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: color 0.15s, border-color 0.15s;
-        }
-
-        .btn-clear:hover { color: var(--text); border-color: var(--dim); }
-        .btn-clear:active { transform: scale(0.97); }
-
-        /* Live result — inline on the same row */
-        .result {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 20px;
-            min-width: 0;
-        }
-
-        .result-hint {
-            font-size: 0.82rem;
-            color: var(--dim);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .result-card {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            animation: fadeUp 0.25s ease-out;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-stat, .result-savings { display: flex; flex-direction: column; gap: 1px; }
-        .result-stat-label { font-size: 0.68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
-        .result-stat-value { font-weight: 700; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
-
-        .result-savings-pct {
-            font-weight: 700;
-            font-size: 1.55rem;
-            line-height: 1;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .result-savings-pct.positive { color: var(--green); }
-        .result-savings-pct.negative { color: var(--red); }
-
-        .result-savings-amount { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
-
-        .deal-tag {
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            padding: 5px 12px;
-            border-radius: 999px;
-            white-space: nowrap;
-        }
-
-        .deal-mythic { background: rgba(192, 132, 252, 0.14); color: var(--purple); border: 1px solid rgba(192, 132, 252, 0.4); }
-        .deal-legendary { background: var(--gold-soft); color: var(--gold); border: 1px solid rgba(224, 182, 79, 0.45); }
-        .deal-great { background: var(--green-soft); color: var(--green); border: 1px solid rgba(61, 220, 151, 0.4); }
-        .deal-good { background: rgba(134, 239, 172, 0.1); color: #86efac; border: 1px solid rgba(134, 239, 172, 0.3); }
-        .deal-okay { background: rgba(253, 224, 71, 0.1); color: #fde047; border: 1px solid rgba(253, 224, 71, 0.3); }
-        .deal-bad { background: var(--red-soft); color: var(--red); border: 1px solid rgba(255, 112, 112, 0.35); }
-
-        .deal-meter {
-            width: 120px;
-            height: 6px;
-            background: var(--bg);
-            border-radius: 999px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-
-        .deal-meter-fill {
-            height: 100%;
-            border-radius: 999px;
-            transition: width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
-        }
-
-        .deal-meter-fill.mythic { background: var(--purple); }
-        .deal-meter-fill.legendary { background: var(--gold); }
-        .deal-meter-fill.positive { background: var(--green); }
-        .deal-meter-fill.negative { background: var(--red); }
-
-        /* ═══════════════════════════════════════════════
-           INFO MODAL
-           ═══════════════════════════════════════════════ */
-        .info-modal { position: fixed; inset: 0; z-index: 100; display: none; }
-        .info-modal.open { display: block; }
-
-        .info-backdrop {
-            position: absolute;
-            inset: 0;
-            background: rgba(5, 7, 10, 0.7);
-            backdrop-filter: blur(4px);
-        }
-
-        .info-dialog {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: min(440px, calc(100vw - 28px));
-            max-height: min(660px, calc(100svh - 28px));
+        .pv-pane-title { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 24px; color: var(--ink); }
+        .pv-count { font-family: var(--font-display); font-weight: 700; font-size: 13px; line-height: 18px; letter-spacing: .04em; color: var(--ink-subtle); }
+        .pv-pane-body {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 0;
             overflow-y: auto;
-            padding: 22px;
-            background: var(--surface-2);
-            border: 1px solid var(--border-strong);
-            border-radius: 14px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+            padding: 0 var(--space-5) var(--space-5);
+            scrollbar-width: thin;
+            scrollbar-color: var(--line-strong) transparent;
         }
+        .pv-pack .kk-empty { padding: var(--space-6) var(--space-4); }
+        .pv-pack .kk-empty-hint { margin: 0; }
+        .pv-group { display: flex; flex-direction: column; }
+        .pv-group + .pv-group { margin-top: var(--space-2); }
+        .pv-group:first-child .kk-row-group { padding-top: 0; }
 
-        .info-close {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 32px;
-            height: 32px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--surface);
-            color: var(--muted);
-            cursor: pointer;
-            font-size: 1.05rem;
-            transition: color 0.15s, border-color 0.15s;
-        }
-
-        .info-close:hover { color: var(--text); border-color: var(--dim); }
-
-        .info-kicker {
-            margin-bottom: 6px;
-            color: var(--blue);
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-        }
-
-        .info-dialog h2 {
-            max-width: calc(100% - 40px);
-            margin-bottom: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            line-height: 1.25;
-        }
-
-        .info-steps {
+        /* Pack totals */
+        .pv-totals {
             display: grid;
-            gap: 8px;
-            margin: 0 0 14px;
-            padding: 0;
-            list-style: none;
-            counter-reset: info-step;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-5) var(--space-4);
+            border-top: 1px solid var(--line);
         }
+        .pv-total { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+        .pv-total .kk-amount { font-size: 22px; line-height: 30px; }
 
-        .info-steps li {
-            counter-increment: info-step;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 10px 12px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.88rem;
-            line-height: 1.4;
-        }
-
-        .info-steps li::before {
-            content: counter(info-step);
-            width: 22px;
-            height: 22px;
-            flex: 0 0 auto;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(106, 168, 255, 0.12);
-            color: var(--blue);
-            font-weight: 700;
-            font-size: 0.74rem;
-        }
-
-        .info-result-note {
-            margin-bottom: 18px;
-            color: var(--muted);
-            font-size: 0.84rem;
-            line-height: 1.5;
-        }
-
-        .gem-rate-title {
-            margin-bottom: 10px;
-            color: var(--gold);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .value-rate-title { margin-top: 18px; }
-
-        .gem-rate-grid {
+        /* Bottom bar: price · clear · verdict */
+        .pv-bar {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 6px;
+            grid-template-columns: 220px auto minmax(0, 1fr);
+            align-items: end;
+            gap: var(--space-3) var(--space-5);
         }
+        .pv-result { align-self: center; min-width: 0; }
+        .pv-hint { margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-subtle); text-align: right; }
 
-        .gem-rate-row {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-            padding: 8px 10px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            color: var(--muted);
-            font-size: 0.82rem;
-        }
-
-        .gem-rate-row span,
-        .gem-rate-row strong { white-space: nowrap; }
-
-        .gem-rate-equals { color: var(--dim); font-weight: 700; }
-
-        .gem-rate-row strong {
-            color: var(--text);
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-            text-align: right;
-        }
-
-        .value-rate-list { display: grid; gap: 6px; }
-
-        .value-rate-row {
+        /* Info dialog tables */
+        .pv-info-block { display: flex; flex-direction: column; gap: var(--space-2); }
+        .pv-rates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+        .pv-rate, .pv-tier {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            padding: 8px 10px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
+            gap: var(--space-2);
+            min-height: 40px;
+            padding: var(--space-1) var(--space-3);
+            background: var(--raised);
+            border-radius: var(--radius-md);
         }
+        .pv-rate .kk-amount { font-size: 15px; }
+        .pv-rate strong, .pv-tier-min { font-family: var(--font-display); font-weight: 700; font-size: 15px; white-space: nowrap; }
+        .pv-rate strong { color: var(--ink); }
+        .pv-tier-min { color: var(--ink-muted); }
+        .pv-tiers { display: grid; gap: var(--space-2); }
 
-        .value-rate-min {
-            color: var(--muted);
-            font-size: 0.82rem;
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-            white-space: nowrap;
+        @media (max-width: 719px) {
+            .pv-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+            .pv-pack { max-height: 32svh; border-right: 0; border-bottom: 1px solid var(--line); }
+            .pv-pack .kk-row { min-height: 52px; padding-block: var(--space-2); }
+            .pv-pane-head { padding: var(--space-3) var(--space-4) var(--space-1); }
+            .pv-pane-body { padding: 0 var(--space-4) var(--space-3); }
+            .pv-pack .kk-empty { padding: var(--space-4); }
+            .pv-totals { grid-template-columns: 1fr 1fr; padding: var(--space-2) var(--space-4) var(--space-3); }
+            .pv-total { flex-direction: column; align-items: flex-start; gap: 0; }
+            .pv-total .kk-amount { font-size: 20px; line-height: 28px; }
+            .pv-bar { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "price clear" "result result"; }
+            .pv-price { grid-area: price; }
+            #btn-clear { grid-area: clear; }
+            .pv-result { grid-area: result; }
+            .pv-hint { text-align: left; }
+            .pv-result .kk-deal { grid-template-areas: "pct tag" "pct note"; }
+            .pv-result .kk-deal-pct { font-size: 28px; line-height: 32px; }
+            .pv-result .kk-meter { display: none; }
         }
-
-        /* ═══════════════════════════════════════════════
-           RESPONSIVE
-           ═══════════════════════════════════════════════ */
-        @media (max-width: 700px) {
-            header { padding: 10px 14px; }
-            header h1 { font-size: 0.92rem; }
-
-            main { flex-direction: column; min-height: 0; }
-
-            .panel { padding: 14px; }
-
-            .panel-left, .panel-right { max-width: 100%; min-height: 0; }
-
-            .panel-left {
-                flex: 0 0 auto;
-                max-height: 32svh;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .panel-right { flex: 1 1 auto; }
-
-            .pack-empty { padding: 28px 16px; }
-
-            .pack-total { position: relative; bottom: auto; margin-top: 8px; padding: 11px 13px; }
-
-            .catalog-item { min-height: 60px; padding: 10px 12px; }
-            .catalog-item-controls { gap: 6px; }
-
-            .btn { width: 36px; height: 36px; }
-            .catalog-item-qty { width: 46px; min-height: 36px; }
-
-            footer { padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); flex: 0 0 auto; }
-
-            .footer-row { gap: 10px; }
-
-            .input-group { flex: 1 1 100%; justify-content: space-between; }
-            .input-wrap { flex: 1; margin-left: 10px; }
-            .input-wrap input { width: 100%; min-height: 40px; }
-
-            .btn-clear { min-height: 38px; }
-
-            .result {
-                flex: 1;
-                justify-content: flex-end;
-                gap: 12px;
-            }
-
-            .result-card { gap: 12px; }
-
-            .result-stat { display: none; }
-            .deal-meter { display: none; }
-
-            .result-savings-pct { font-size: 1.3rem; }
-            .result-savings-amount { font-size: 0.68rem; }
-
-            .deal-tag { padding: 4px 10px; font-size: 0.62rem; }
-
-            .info-dialog { padding: 18px; }
-            .gem-rate-grid { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 420px) {
-            header h1 { font-size: 0.86rem; }
-            .store-btn, .lang-toggle { padding: 0 9px; font-size: 0.74rem; }
-            .header-actions { gap: 6px; }
-            .panel { padding: 12px; }
-            .catalog-item { gap: 10px; }
-            .catalog-item-name { font-size: 0.84rem; }
+        @media (max-width: 479px) {
+            .pv-footer { display: none; }
+            .pv-rates { grid-template-columns: minmax(0, 1fr); }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1><span class="gem-dot" aria-hidden="true"></span><span id="title">CoC Pack Calculator</span></h1>
-        <div class="header-actions">
-            <button class="info-toggle" id="info-toggle" type="button" aria-haspopup="dialog" aria-expanded="false">i</button>
-            <a class="store-btn" id="store-btn" target="_blank" rel="noopener">สโตร์</a>
-            <button class="lang-toggle" id="lang-toggle" title="Switch language">TH</button>
-        </div>
-    </header>
+    <svg class="kk-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <symbol id="kk-gem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M9.5 3 8 9l4 12 4-12-1.5-6"/></symbol>
+        <symbol id="kk-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></symbol>
+        <symbol id="kk-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+        <symbol id="kk-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></symbol>
+        <symbol id="kk-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></symbol>
+        <symbol id="kk-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+    </svg>
 
-    <div class="info-modal" id="info-modal" aria-hidden="true">
-        <div class="info-backdrop" data-info-close></div>
-        <section class="info-dialog" role="dialog" aria-modal="true" aria-labelledby="info-title">
-            <button class="info-close" id="info-close" type="button" data-info-close aria-label="Close">&times;</button>
-            <div class="info-kicker" id="info-kicker"></div>
-            <h2 id="info-title"></h2>
-            <ol class="info-steps" id="info-steps"></ol>
-            <p class="info-result-note" id="info-result-note"></p>
-            <div class="gem-rate-title" id="gem-rate-title"></div>
-            <div class="gem-rate-grid" id="gem-rate-list"></div>
-            <div class="gem-rate-title value-rate-title" id="value-rate-title"></div>
-            <div class="value-rate-list" id="value-rate-list"></div>
-        </section>
+    <div class="kk-app">
+        <header class="kk-topbar">
+            <a class="kk-brand" href="https://www.klawkla.com/">
+                <img class="kk-brand-mark" src="images/logo.webp" alt="แกล้วกล้า" width="32" height="32">
+                <span class="kk-brand-name">KLAWKLA</span>
+            </a>
+            <h1 class="kk-topbar-title" id="title">คำนวณความคุ้ม</h1>
+            <div class="kk-topbar-actions">
+                <button class="kk-iconbtn kk-iconbtn--sm" id="info-toggle" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="info-modal">
+                    <svg class="kk-icon" aria-hidden="true"><use href="#kk-info"/></svg>
+                </button>
+                <a class="kk-btn kk-btn--sm" id="store-btn" target="_blank" rel="noopener">
+                    <span id="store-label">สโตร์</span>
+                    <svg class="kk-icon" aria-hidden="true"><use href="#kk-external"/></svg>
+                </a>
+                <div class="kk-seg kk-seg--sm" role="group" aria-label="ภาษา / Language" id="lang-toggle">
+                    <button class="kk-seg-opt" type="button" data-lang="th" aria-pressed="true">TH</button>
+                    <button class="kk-seg-opt" type="button" data-lang="en" aria-pressed="false">EN</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="pv-main">
+            <section class="pv-pane pv-pack" aria-labelledby="pack-title">
+                <div class="pv-pane-head">
+                    <h2 class="pv-pane-title" id="pack-title">แพ็คของคุณ</h2>
+                    <span class="pv-count" id="pack-count"></span>
+                </div>
+                <div class="pv-pane-body">
+                    <div class="kk-rows" id="pack-list"></div>
+                </div>
+                <div class="pv-totals" id="pack-total" hidden>
+                    <div class="pv-total">
+                        <span class="kk-label" id="label-total-gems">เพชรรวม</span>
+                        <span class="kk-amount kk-amount--gem" id="total-gems"></span>
+                    </div>
+                    <div class="pv-total">
+                        <span class="kk-label" id="label-original-price">ราคาเดิม</span>
+                        <span class="kk-amount" id="total-thb"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pv-pane pv-catalog" aria-labelledby="catalog-title">
+                <div class="pv-pane-head">
+                    <h2 class="pv-pane-title" id="catalog-title">รายการไอเทม</h2>
+                </div>
+                <div class="pv-pane-body" id="catalog"></div>
+            </section>
+        </main>
+
+        <div class="kk-bottombar">
+            <div class="kk-bottombar-row pv-bar">
+                <div class="kk-field pv-price">
+                    <label class="kk-label" for="sale-price" id="label-sale-price">ราคาขายแพ็ค</label>
+                    <div class="kk-input-wrap">
+                        <input class="kk-input kk-input--suffixed" type="number" id="sale-price" placeholder="0" min="0" inputmode="decimal">
+                        <span class="kk-input-suffix" id="price-suffix">บาท</span>
+                    </div>
+                </div>
+                <button class="kk-btn kk-btn--ghost" id="btn-clear" type="button">ล้างทั้งหมด</button>
+                <div class="pv-result" id="result" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <footer class="kk-footer kk-footer--bar pv-footer">
+            <p><span id="credit">สร้างโดยผู้เล่นแคลชเพื่อผู้เล่นแคลช</span> · <a href="https://www.klawkla.com" target="_blank" rel="noopener">klawkla.com</a></p>
+        </footer>
     </div>
 
-    <main>
-        <section class="panel panel-left">
-            <div class="section-title" id="pack-title"></div>
-            <div id="pack-list"></div>
-            <div id="pack-total" style="display:none;" class="pack-total">
-                <div class="pack-total-row">
-                    <span class="pack-total-label" id="label-total-gems"></span>
-                    <span class="pack-total-value" id="total-gems">0</span>
-                </div>
-                <div class="pack-total-row">
-                    <span class="pack-total-label" id="label-original-price"></span>
-                    <span class="pack-total-value-thb" id="total-thb">0 THB</span>
-                </div>
+    <div class="kk-dialog-scrim" id="info-scrim" data-info-close hidden></div>
+    <section class="kk-dialog" id="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-title" hidden>
+        <button class="kk-iconbtn kk-iconbtn--sm kk-dialog-close" id="info-close" type="button" data-info-close>
+            <svg class="kk-icon" aria-hidden="true"><use href="#kk-close"/></svg>
+        </button>
+        <p class="kk-eyebrow" id="info-kicker"></p>
+        <h2 class="kk-dialog-title" id="info-title"></h2>
+        <div class="kk-dialog-body">
+            <ol class="kk-steps" id="info-steps"></ol>
+            <p id="info-result-note"></p>
+            <div class="pv-info-block">
+                <h3 class="kk-label" id="gem-rate-title"></h3>
+                <div class="pv-rates" id="gem-rate-list"></div>
             </div>
-        </section>
-
-        <section class="panel panel-right">
-            <div class="section-title" id="catalog-title"></div>
-            <div id="catalog"></div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="footer-row">
-            <div class="input-group">
-                <label for="sale-price" id="label-sale-price"></label>
-                <div class="input-wrap">
-                    <input type="number" id="sale-price" placeholder="0" min="0">
-                    <span class="input-suffix">THB</span>
-                </div>
+            <div class="pv-info-block">
+                <h3 class="kk-label" id="value-rate-title"></h3>
+                <div class="pv-tiers" id="value-rate-list"></div>
             </div>
-            <button class="btn-clear" id="btn-clear"></button>
-            <div class="result" id="result"></div>
         </div>
-    </footer>
+    </section>
 
     <script>
         /* ═══════════════════════════════════
            I18N
            ═══════════════════════════════════ */
+        const NBSP = ' ';
         const i18n = {
             th: {
                 title: 'คำนวณความคุ้ม',
                 yourPack: 'แพ็คของคุณ',
                 itemCatalog: 'รายการไอเทม',
-                totalGems: 'อัญมณีรวม',
+                totalGems: 'เพชรรวม',
                 originalPrice: 'ราคาเดิม',
                 salePrice: 'ราคาขายแพ็ค',
                 clearAll: 'ล้างทั้งหมด',
                 emptyPack: 'เลือกไอเทมจากรายการเพื่อสร้างแพ็คของคุณ',
-                gems: 'อัญมณี',
-                original: 'ราคาเดิม',
-                sale: 'ราคาขาย',
-                youSave: 'คุณประหยัด',
-                youOverpay: 'คุณจ่ายเกิน',
+                gems: 'เพชร',
+                currency: 'บาท',
+                count: n => `${n} ชิ้น`,
+                noteSave: (x, o) => `คุณประหยัด ${x}${NBSP}บาท จากราคาเดิม ${o}${NBSP}บาท`,
+                noteOver: (x, o) => `คุณจ่ายเกิน ${x}${NBSP}บาท จากราคาเดิม ${o}${NBSP}บาท`,
                 mythic: 'ระดับเทพ',
                 legendary: 'ตำนาน',
                 great: 'คุ้มมาก',
@@ -950,12 +258,14 @@
                     'พิมพ์ราคาขายในสโตร์',
                     'ผลลัพธ์แสดงทันที',
                 ],
-                infoResultNote: 'ผลลัพธ์จะแสดง % ส่วนลด และจำนวนเงินที่ประหยัดได้เทียบกับการซื้ออัญมณีโดยตรง',
-                gemRateTitle: 'อัตราราคาอัญมณีล่าสุด',
+                infoResultNote: 'ผลลัพธ์จะแสดง % ส่วนลด และจำนวนเงินที่ประหยัดได้เทียบกับการซื้อเพชรโดยตรง',
+                gemRateTitle: 'อัตราราคาเพชรล่าสุด',
                 valueRateTitle: 'เกณฑ์ระดับความคุ้ม',
                 belowTen: 'ต่ำกว่า 10%',
-                langBtn: 'EN',
-                categories: { books: 'ตำรา', potions: 'น้ำยา', runes: 'รูน', ores: 'แร่', other: 'อื่นๆ' },
+                store: 'สโตร์',
+                storeUrl: 'https://store.supercell.com/th/clashofclans?boost=KLAWKLA',
+                credit: 'สร้างโดยผู้เล่นแคลชเพื่อผู้เล่นแคลช',
+                categories: { books: 'ตำรา', potions: 'น้ำยา', runes: 'รูน', ores: 'แร่', other: 'อื่น ๆ' },
             },
             en: {
                 title: 'Pack Value',
@@ -967,10 +277,10 @@
                 clearAll: 'Clear All',
                 emptyPack: 'Select items from the catalog to build your pack',
                 gems: 'gems',
-                original: 'Original',
-                sale: 'Sale',
-                youSave: 'You save',
-                youOverpay: 'You overpay',
+                currency: 'THB',
+                count: n => `${n} ${n === 1 ? 'item' : 'items'}`,
+                noteSave: (x, o) => `You save ${x}${NBSP}THB against ${o}${NBSP}THB in gems`,
+                noteOver: (x, o) => `You overpay ${x}${NBSP}THB against ${o}${NBSP}THB in gems`,
                 mythic: 'Mythic',
                 legendary: 'Legendary',
                 great: 'Great',
@@ -996,7 +306,9 @@
                 gemRateTitle: 'Latest gem price rate',
                 valueRateTitle: 'Value rating scale',
                 belowTen: 'Below 10%',
-                langBtn: 'TH',
+                store: 'Store',
+                storeUrl: 'https://store.supercell.com/clashofclans?boost=KLAWKLA',
+                credit: 'Made by Clash players for Clash players',
                 categories: { books: 'Books', potions: 'Potions', runes: 'Runes', ores: 'Ores', other: 'Other' },
             },
         };
@@ -1051,14 +363,23 @@
             { gems: 30000, thb: 2990 },
         ];
 
+        /* key doubles as the kk-deal data-tier */
         const valueLevels = [
-            { key: 'mythic', min: 80, dealClass: 'deal-mythic', meterClass: 'mythic' },
-            { key: 'legendary', min: 60, dealClass: 'deal-legendary', meterClass: 'legendary' },
-            { key: 'great', min: 40, dealClass: 'deal-great', meterClass: 'positive' },
-            { key: 'good', min: 25, dealClass: 'deal-good', meterClass: 'positive' },
-            { key: 'okay', min: 10, dealClass: 'deal-okay', meterClass: 'positive' },
-            { key: 'bad', min: null, dealClass: 'deal-bad', meterClass: 'negative' },
+            { key: 'mythic', min: 80 },
+            { key: 'legendary', min: 60 },
+            { key: 'great', min: 40 },
+            { key: 'good', min: 25 },
+            { key: 'okay', min: 10 },
+            { key: 'bad', min: null },
         ];
+        const TIER_TAG = {
+            mythic: 'class="kk-tag kk-tag--hue" style="--hue: var(--violet)"',
+            legendary: 'class="kk-tag kk-tag--hue" style="--hue: var(--sun)"',
+            great: 'class="kk-tag kk-tag--good"',
+            good: 'class="kk-tag kk-tag--good"',
+            okay: 'class="kk-tag kk-tag--warn"',
+            bad: 'class="kk-tag kk-tag--bad"',
+        };
 
         /* ═══════════════════════════════════
            STATE
@@ -1103,8 +424,16 @@
         }
 
         /* ═══════════════════════════════════
-           RENDER
+           HELPERS
            ═══════════════════════════════════ */
+        const fmt = n => n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+        function gemAmount(n, extraClass = '') {
+            return `<span class="kk-amount kk-amount--gem ${extraClass}">${fmt(n)}<span class="kk-sr"> ${t('gems')}</span><svg class="kk-amount-icon" aria-hidden="true"><use href="#kk-gem"/></svg></span>`;
+        }
+
+        const icon = name => `<svg class="kk-icon" aria-hidden="true"><use href="#kk-${name}"/></svg>`;
+
         function getTotalGems() {
             return pack.reduce((sum, qty, i) => sum + qty * items[i].gems, 0);
         }
@@ -1117,29 +446,34 @@
             return level.min === null ? t('belowTen') : `${level.min}%+`;
         }
 
+        /* ═══════════════════════════════════
+           RENDER
+           ═══════════════════════════════════ */
         function renderUI() {
+            document.documentElement.lang = lang;
+            document.title = `${t('title')} · KLAWKLA`;
             document.getElementById('title').textContent = t('title');
             document.getElementById('pack-title').textContent = t('yourPack');
             document.getElementById('catalog-title').textContent = t('itemCatalog');
             document.getElementById('label-total-gems').textContent = t('totalGems');
             document.getElementById('label-original-price').textContent = t('originalPrice');
             document.getElementById('label-sale-price').textContent = t('salePrice');
+            document.getElementById('price-suffix').textContent = t('currency');
             document.getElementById('btn-clear').textContent = t('clearAll');
-            document.getElementById('lang-toggle').textContent = t('langBtn');
-            const storeBtn = document.getElementById('store-btn');
-            storeBtn.textContent = lang === 'th' ? 'สโตร์' : 'STORE';
-            storeBtn.href = lang === 'th'
-                ? 'https://store.supercell.com/th/clashofclans?boost=KLAWKLA'
-                : 'https://store.supercell.com/clashofclans?boost=KLAWKLA';
+            document.getElementById('credit').textContent = t('credit');
+            document.getElementById('store-label').textContent = t('store');
+            document.getElementById('store-btn').href = t('storeUrl');
+            document.querySelectorAll('#lang-toggle [data-lang]').forEach(btn => {
+                btn.setAttribute('aria-pressed', String(btn.dataset.lang === lang));
+            });
             renderInfoContent();
         }
 
         function renderInfoContent() {
             const infoToggle = document.getElementById('info-toggle');
-            const infoClose = document.getElementById('info-close');
             infoToggle.setAttribute('aria-label', t('infoLabel'));
             infoToggle.title = t('infoLabel');
-            infoClose.setAttribute('aria-label', t('infoClose'));
+            document.getElementById('info-close').setAttribute('aria-label', t('infoClose'));
             document.getElementById('info-kicker').textContent = t('infoKicker');
             document.getElementById('info-title').textContent = t('infoTitle');
             document.getElementById('info-steps').innerHTML = t('infoSteps')
@@ -1148,25 +482,12 @@
             document.getElementById('info-result-note').textContent = t('infoResultNote');
             document.getElementById('gem-rate-title').textContent = t('gemRateTitle');
             document.getElementById('gem-rate-list').innerHTML = gemPacks
-                .map(packRate => `<div class="gem-rate-row"><span>${packRate.gems.toLocaleString()} <span aria-hidden="true">💎</span></span><span class="gem-rate-equals"> = </span><strong>${packRate.thb.toLocaleString()} THB</strong></div>`)
+                .map(rate => `<div class="pv-rate">${gemAmount(rate.gems)}<strong>${fmt(rate.thb)}${NBSP}${t('currency')}</strong></div>`)
                 .join('');
             document.getElementById('value-rate-title').textContent = t('valueRateTitle');
             document.getElementById('value-rate-list').innerHTML = valueLevels
-                .map(level => `<div class="value-rate-row"><span class="value-rate-min">${valueLevelText(level)}</span><span class="deal-tag ${level.dealClass}">${t(level.key)}</span></div>`)
+                .map(level => `<div class="pv-tier"><span class="pv-tier-min">${valueLevelText(level)}</span><span ${TIER_TAG[level.key]}>${t(level.key)}</span></div>`)
                 .join('');
-        }
-
-        function setInfoModal(open) {
-            const modal = document.getElementById('info-modal');
-            const toggle = document.getElementById('info-toggle');
-            modal.classList.toggle('open', open);
-            modal.setAttribute('aria-hidden', String(!open));
-            toggle.setAttribute('aria-expanded', String(open));
-            if (open) {
-                document.getElementById('info-close').focus();
-            } else {
-                toggle.focus();
-            }
         }
 
         function render() {
@@ -1179,64 +500,82 @@
         function renderPack() {
             const listEl = document.getElementById('pack-list');
             const totalEl = document.getElementById('pack-total');
-            const hasItems = pack.some(q => q > 0);
+            const countEl = document.getElementById('pack-count');
+            const units = pack.reduce((sum, qty) => sum + qty, 0);
 
-            if (!hasItems) {
-                listEl.innerHTML = `<div class="pack-empty">${t('emptyPack')}</div>`;
-                totalEl.style.display = 'none';
+            if (units === 0) {
+                listEl.innerHTML = `<div class="kk-empty"><p class="kk-empty-hint">${t('emptyPack')}</p></div>`;
+                totalEl.hidden = true;
+                countEl.textContent = '';
                 return;
             }
 
             let html = '';
-            let totalGemsVal = 0;
-
             for (let i = 0; i < items.length; i++) {
-                if (pack[i] > 0) {
-                    const itemGems = items[i].gems * pack[i];
-                    totalGemsVal += itemGems;
-                    html += `<div class="pack-item">
-                        <div class="catalog-item-icon"><img src="images/${items[i].img}" alt="" aria-hidden="true" loading="lazy"></div>
-                        <div class="pack-item-body">
-                            <div class="pack-item-name">${itemName(items[i])} &times;${pack[i]}</div>
-                            <div class="pack-item-detail"><span class="gem-dot"></span>${itemGems.toLocaleString()} ${t('gems')}</div>
-                        </div>
-                        <button class="pack-item-remove" data-remove="${i}" aria-label="${t('remove')} ${itemName(items[i])}">&times;</button>
-                    </div>`;
-                }
+                if (pack[i] === 0) continue;
+                html += `<div class="kk-row">
+                    <span class="kk-row-icon"><img src="images/${items[i].img}" alt="" width="40" height="40" loading="lazy"></span>
+                    <div class="kk-row-body">
+                        <p class="kk-row-title">${itemName(items[i])} &times;${NBSP}${pack[i]}</p>
+                        <p class="kk-row-meta">${gemAmount(items[i].gems * pack[i])}</p>
+                    </div>
+                    <div class="kk-row-end">
+                        <button class="kk-iconbtn kk-iconbtn--sm" type="button" data-remove="${i}" aria-label="${t('remove')} ${itemName(items[i])}">${icon('close')}</button>
+                    </div>
+                </div>`;
             }
 
+            const totalGems = getTotalGems();
             listEl.innerHTML = html;
-            totalEl.style.display = 'block';
-            document.getElementById('total-gems').textContent = totalGemsVal.toLocaleString();
-            document.getElementById('total-thb').textContent = gemsToTHB(totalGemsVal).toLocaleString() + ' THB';
+            totalEl.hidden = false;
+            countEl.textContent = t('count')(units);
+            document.getElementById('total-gems').innerHTML = `${fmt(totalGems)}<span class="kk-sr"> ${t('gems')}</span><svg class="kk-amount-icon" aria-hidden="true"><use href="#kk-gem"/></svg>`;
+            document.getElementById('total-thb').textContent = `${fmt(gemsToTHB(totalGems))}${NBSP}${t('currency')}`;
+        }
+
+        function catalogRow(i) {
+            const qty = pack[i];
+            const name = itemName(items[i]);
+            return `<div class="kk-row kk-row--tile${qty > 0 ? ' is-selected' : ''}" data-row="${i}">
+                <span class="kk-row-icon"><img src="images/${items[i].img}" alt="" width="40" height="40" loading="lazy"></span>
+                <div class="kk-row-body">
+                    <p class="kk-row-title">${name}</p>
+                    <p class="kk-row-meta">${gemAmount(items[i].gems)}</p>
+                </div>
+                <div class="kk-row-end">
+                    <div class="kk-stepper kk-stepper--sm">
+                        <button class="kk-stepper-key" type="button" data-sub="${i}" aria-label="${t('decrease')} ${name}"${qty === 0 ? ' disabled' : ''}>${icon('minus')}</button>
+                        <input class="kk-stepper-input${qty === 0 ? ' is-zero' : ''}" type="number" id="qty-${i}" value="${qty}" min="0" inputmode="numeric" data-qty="${i}" aria-label="${t('quantity')} ${name}">
+                        <button class="kk-stepper-key" type="button" data-add="${i}" aria-label="${t('increase')} ${name}">${icon('plus')}</button>
+                    </div>
+                </div>
+            </div>`;
         }
 
         function renderCatalog() {
-            const catalogEl = document.getElementById('catalog');
             let html = '';
-
             for (const cat of categories) {
-                html += `<div class="category-header">${t('categories')[cat.key]}</div>`;
-                for (let i = 0; i < items.length; i++) {
-                    if (items[i].cat !== cat.key) continue;
-                    const qty = pack[i];
-                    const isActive = qty > 0;
-                    html += `<div class="catalog-item${isActive ? ' active' : ''}">
-                        <div class="catalog-item-icon"><img src="images/${items[i].img}" alt="" aria-hidden="true" loading="lazy"></div>
-                        <div class="catalog-item-info">
-                            <div class="catalog-item-name">${itemName(items[i])}</div>
-                            <div class="catalog-item-gems"><span class="gem-dot"></span>${items[i].gems} ${t('gems')}</div>
-                        </div>
-                        <div class="catalog-item-controls">
-                            <button class="btn btn-sub${qty === 0 ? ' disabled' : ''}" data-sub="${i}" aria-label="${t('decrease')} ${itemName(items[i])}">&minus;</button>
-                            <input type="number" class="catalog-item-qty${qty === 0 ? ' zero' : ''}" value="${qty}" min="0" inputmode="numeric" data-qty="${i}" aria-label="${t('quantity')} ${itemName(items[i])}">
-                            <button class="btn btn-add" data-add="${i}" aria-label="${t('increase')} ${itemName(items[i])}">+</button>
-                        </div>
-                    </div>`;
-                }
+                const rows = items.map((item, i) => item.cat === cat.key ? catalogRow(i) : '').join('');
+                html += `<div class="pv-group">
+                    <h3 class="kk-eyebrow kk-row-group">${t('categories')[cat.key]}</h3>
+                    <div class="kk-rows kk-rows--tiles">${rows}</div>
+                </div>`;
             }
+            document.getElementById('catalog').innerHTML = html;
+        }
 
-            catalogEl.innerHTML = html;
+        /* Update one catalog row in place, so focus and scroll stay put */
+        function syncRow(i) {
+            const row = document.querySelector(`[data-row="${i}"]`);
+            if (!row) return;
+            const qty = pack[i];
+            row.classList.toggle('is-selected', qty > 0);
+            const input = row.querySelector('[data-qty]');
+            if (document.activeElement !== input) input.value = qty;
+            input.classList.toggle('is-zero', qty === 0);
+            const subBtn = row.querySelector('[data-sub]');
+            if (qty === 0 && document.activeElement === subBtn) row.querySelector('[data-add]').focus();
+            subBtn.disabled = qty === 0;
         }
 
         /* ═══════════════════════════════════
@@ -1247,101 +586,113 @@
             const totalGems = getTotalGems();
 
             if (totalGems === 0) {
-                resultEl.innerHTML = `<span class="result-hint">${t('hintNoItems')}</span>`;
+                resultEl.innerHTML = `<p class="pv-hint">${t('hintNoItems')}</p>`;
                 return;
             }
 
             const rawPrice = document.getElementById('sale-price').value;
             const salePrice = parseFloat(rawPrice);
             if (rawPrice === '' || isNaN(salePrice) || salePrice < 0) {
-                resultEl.innerHTML = `<span class="result-hint">${t('hintNoPrice')}</span>`;
+                resultEl.innerHTML = `<p class="pv-hint">${t('hintNoPrice')}</p>`;
                 return;
             }
 
             const originalTHB = gemsToTHB(totalGems);
             const savings = originalTHB - salePrice;
-            const pct = originalTHB > 0 ? ((savings / originalTHB) * 100) : 0;
-            const pctRounded = Number(pct.toFixed(1));
-            const pctAbs = Math.abs(pctRounded).toFixed(1);
-            const isPositive = savings >= 0;
+            const pct = Math.round(originalTHB > 0 ? (savings / originalTHB) * 100 : 0);
+            const level = getValueLevel(pct);
+            const sign = pct > 0 ? '+' : pct < 0 ? '−' : '';
+            const meter = Math.min(100, Math.abs(pct));
+            const note = savings >= 0
+                ? t('noteSave')(fmt(savings), fmt(originalTHB))
+                : t('noteOver')(fmt(Math.abs(savings)), fmt(originalTHB));
+            const ticks = [10, 25, 40, 60, 80].map(v => `<i class="kk-meter-tick" style="left:${v}%"></i>`).join('');
 
-            const dealLevel = getValueLevel(pctRounded);
-            const meterWidth = Math.min(100, Math.max(0, pctRounded));
-            const saveText = isPositive ? t('youSave') : t('youOverpay');
-
-            resultEl.innerHTML = `<div class="result-card">
-                <div class="result-stat">
-                    <span class="result-stat-label">${t('original')}</span>
-                    <span class="result-stat-value">${originalTHB.toLocaleString()} THB</span>
-                </div>
-                <div class="result-stat">
-                    <span class="result-stat-label">${t('sale')}</span>
-                    <span class="result-stat-value">${salePrice.toLocaleString()} THB</span>
-                </div>
-                <div class="result-savings">
-                    <span class="result-savings-pct ${isPositive ? 'positive' : 'negative'}">${isPositive ? '' : '-'}${pctAbs}%</span>
-                    <span class="result-savings-amount">${saveText} ${Math.abs(savings).toLocaleString()} THB</span>
-                </div>
-                <div class="deal-meter">
-                    <div class="deal-meter-fill ${dealLevel.meterClass}" style="width:${meterWidth}%"></div>
-                </div>
-                <span class="deal-tag ${dealLevel.dealClass}">${t(dealLevel.key)}</span>
+            resultEl.innerHTML = `<div class="kk-deal" data-tier="${level.key}" style="--pct:${meter}%">
+                <span class="kk-deal-pct">${sign}${Math.abs(pct)}%</span>
+                <span class="kk-tag">${t(level.key)}</span>
+                <span class="kk-deal-note">${note}</span>
+                <div class="kk-meter" aria-hidden="true"><i class="kk-meter-fill"></i>${ticks}</div>
             </div>`;
+        }
+
+        /* ═══════════════════════════════════
+           INFO DIALOG
+           ═══════════════════════════════════ */
+        const infoModal = document.getElementById('info-modal');
+        const infoScrim = document.getElementById('info-scrim');
+        const infoToggle = document.getElementById('info-toggle');
+
+        function setInfoModal(open) {
+            infoModal.hidden = !open;
+            infoScrim.hidden = !open;
+            infoToggle.setAttribute('aria-expanded', String(open));
+            (open ? document.getElementById('info-close') : infoToggle).focus();
         }
 
         /* ═══════════════════════════════════
            EVENT HANDLERS
            ═══════════════════════════════════ */
-        document.getElementById('catalog').addEventListener('click', (e) => {
+        const catalogEl = document.getElementById('catalog');
+
+        catalogEl.addEventListener('click', (e) => {
             const addBtn = e.target.closest('[data-add]');
             const subBtn = e.target.closest('[data-sub]');
-            if (addBtn) {
-                pack[parseInt(addBtn.dataset.add)]++;
-                render();
-            } else if (subBtn) {
-                const idx = parseInt(subBtn.dataset.sub);
-                pack[idx] = Math.max(0, pack[idx] - 1);
-                render();
-            }
-        });
-
-        document.getElementById('catalog').addEventListener('input', (e) => {
-            const qtyInput = e.target.closest('[data-qty]');
-            if (!qtyInput) return;
-            const idx = parseInt(qtyInput.dataset.qty);
-            const val = parseInt(qtyInput.value);
-            pack[idx] = isNaN(val) || val < 0 ? 0 : val;
+            const btn = addBtn || subBtn;
+            if (!btn) return;
+            const idx = parseInt(btn.dataset.add ?? btn.dataset.sub, 10);
+            pack[idx] = addBtn ? pack[idx] + 1 : Math.max(0, pack[idx] - 1);
+            syncRow(idx);
             renderPack();
             updateResult();
-            // Update active state and minus button without losing focus
-            const item = qtyInput.closest('.catalog-item');
-            item.classList.toggle('active', pack[idx] > 0);
-            qtyInput.classList.toggle('zero', pack[idx] === 0);
-            const subBtn = item.querySelector('[data-sub]');
-            subBtn.classList.toggle('disabled', pack[idx] === 0);
+        });
+
+        catalogEl.addEventListener('input', (e) => {
+            const qtyInput = e.target.closest('[data-qty]');
+            if (!qtyInput) return;
+            const idx = parseInt(qtyInput.dataset.qty, 10);
+            const val = parseInt(qtyInput.value, 10);
+            pack[idx] = isNaN(val) || val < 0 ? 0 : val;
+            syncRow(idx);
+            renderPack();
+            updateResult();
+        });
+
+        catalogEl.addEventListener('focusin', (e) => {
+            if (e.target.matches('[data-qty]')) e.target.select();
+        });
+
+        catalogEl.addEventListener('focusout', (e) => {
+            if (e.target.matches('[data-qty]')) e.target.value = pack[parseInt(e.target.dataset.qty, 10)];
         });
 
         document.getElementById('pack-list').addEventListener('click', (e) => {
             const removeBtn = e.target.closest('[data-remove]');
-            if (removeBtn) {
-                pack[parseInt(removeBtn.dataset.remove)] = 0;
-                render();
-            }
+            if (!removeBtn) return;
+            const idx = parseInt(removeBtn.dataset.remove, 10);
+            pack[idx] = 0;
+            syncRow(idx);
+            renderPack();
+            updateResult();
         });
 
-        document.getElementById('info-toggle').addEventListener('click', () => {
-            setInfoModal(true);
-        });
+        infoToggle.addEventListener('click', () => setInfoModal(true));
 
-        document.getElementById('info-modal').addEventListener('click', (e) => {
-            if (e.target.closest('[data-info-close]')) {
-                setInfoModal(false);
-            }
+        document.addEventListener('click', (e) => {
+            if (!infoModal.hidden && e.target.closest('[data-info-close]')) setInfoModal(false);
         });
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && document.getElementById('info-modal').classList.contains('open')) {
+            if (infoModal.hidden) return;
+            if (e.key === 'Escape') {
                 setInfoModal(false);
+            } else if (e.key === 'Tab') {
+                /* keep focus inside the dialog */
+                const focusables = infoModal.querySelectorAll('button, a[href], input');
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+                else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
             }
         });
 
@@ -1353,8 +704,10 @@
 
         document.getElementById('sale-price').addEventListener('input', updateResult);
 
-        document.getElementById('lang-toggle').addEventListener('click', () => {
-            lang = lang === 'th' ? 'en' : 'th';
+        document.getElementById('lang-toggle').addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-lang]');
+            if (!btn || btn.dataset.lang === lang) return;
+            lang = btn.dataset.lang;
             render();
         });
 
