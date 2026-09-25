@@ -342,7 +342,8 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 
 /* ---------- StatTile ---------- */
-.kk-stats { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.kk-stats { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.kk-stats > * { flex: 1 1 130px; }
 .kk-stat {
   --cur: var(--ink);
   display: flex;
@@ -375,7 +376,7 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .kk-stat--total { --cur: var(--gem); background: var(--gem-soft); border-color: transparent; }
 .kk-stat--total .kk-stat-label { color: var(--gem); }
 .kk-stat--total .kk-stat-value { font-size: 40px; line-height: 44px; }
-.kk-stat--wide { grid-column: 1 / -1; }
+.kk-stat--wide, .kk-stats > .kk-stat--wide { flex-basis: 100%; }
 
 /* ---------- LevelTable ---------- */
 .kk-table-wrap { position: relative; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
@@ -418,7 +419,7 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .kk-table tbody tr.is-key { background: var(--raised); }
 .kk-table tbody tr.is-key td { font-weight: 700; }
 .kk-table tbody tr.is-key .kk-lv { background: var(--line-strong); color: var(--ink); }
-.kk-table tbody tr.is-range { background: var(--elixir-soft); }
+.kk-table tbody tr.is-range, .kk-table tbody tr.is-range:hover { background: var(--elixir-soft); }
 .kk-table tbody tr.is-range .kk-lv { background: transparent; color: var(--elixir-text); box-shadow: inset 0 0 0 1px var(--elixir); }
 .kk-table tbody tr.is-anchor .kk-lv { background: var(--elixir); color: var(--on-elixir); box-shadow: none; }
 .kk-table tfoot th, .kk-table tfoot td {
@@ -433,6 +434,12 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .kk-table-note span { display: inline-flex; align-items: center; gap: var(--space-2); }
 .kk-swatch { width: 14px; height: 14px; border-radius: 4px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-strong); }
 .kk-swatch--range { background: var(--elixir-soft); box-shadow: inset 0 0 0 1px var(--elixir); }
+@media (max-width: 479px) {
+  .kk-table th, .kk-table td { padding-left: 6px; padding-right: 6px; }
+  .kk-table tfoot th { white-space: normal; }
+  .kk-th-icon { flex-direction: column; align-items: flex-end; gap: 2px; }
+  .kk-th-icon img, .kk-th-icon .kk-icon { width: 18px; height: 18px; }
+}
 
 /* ---------- ItemRow ---------- */
 .kk-rows { display: flex; flex-direction: column; }
